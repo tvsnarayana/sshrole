@@ -1,0 +1,19 @@
+---
+# tasks file for deploy_authorized_keys
+
+   - name: Set authorized key for user ubuntu copying it from current user
+     authorized_key:
+       user: "{{ ansible_user }}"
+       state: present
+       key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
+# Copy a new "ntp.conf file into place, backing up the original if it differs from the copied version
+   - copy:
+       src: '~/.ssh/id_rsa.pub'
+       dest: '~/.ssh/id_rsa.pub_{{ ansible_date_time.iso8601 }}'
+       owner: "{{ ansible_user }}"
+       mode: 0644
+       backup: yes
+     run_once: yes
+     delegate_to: localhost
+
