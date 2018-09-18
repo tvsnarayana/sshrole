@@ -1,0 +1,16 @@
+---
+- name: generating public key and private key
+  block:
+       - openssl_privatekey:
+           path: "{{ lookup('env','HOME') }}/.ssh/{{ application_name }}/id_rsa_dev_{{ username }}"
+           size: 2048
+         delegate_to: localhost
+  
+       - openssl_publickey:
+            path:  "{{ lookup('env','HOME') }}/.ssh/{{ application_name }}/id_rsa_dev_{{ username }}.pub"
+            privatekey_path: "{{ lookup('env','HOME') }}/.ssh/{{ application_name }}/id_rsa_dev_{{ username }}"
+            format: OpenSSH
+         delegate_to: localhost
+  rescue:
+       - shell: ssh-keygen -t rsa -f {{ lookup('env','HOME') }}/.ssh/{{ application_name }}/id_rsa_dev_{{ username }}  -N "" | quote
+         delegate_to: localhost  

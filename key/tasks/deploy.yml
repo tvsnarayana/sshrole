@@ -1,0 +1,22 @@
+---
+- name: checking user status
+  user:
+    name: "{{ username}}"
+  register: user_stat
+  check_mode: yes
+
+- name: Backup authorized keys file
+  copy:
+    src: '/home/{{ username }}/.ssh/authorized_keys'
+    dest: '/home/{{ username }}/.ssh/authorized_keys_{{ ansible_date_time.iso8601 }}'
+    owner: "{{ username }}"
+    mode: 0644
+  when: user_stat.changed == false
+
+
+- name: Set authorized key for user ubuntu copying it from current user
+  authorized_key:
+    user: "{{ username }}"
+    state: present
+    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/{{ application_name }}/id_rsa_dev_{{ username }}.pub') }}"
+  when: user_stat.changed == false

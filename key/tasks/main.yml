@@ -1,0 +1,22 @@
+---
+- name: Ansible check directory exists example.
+  stat:
+    path: "{{ lookup('env','HOME') }}/.ssh/{{ application_name }}"
+  register: dir_stat
+  delegate_to: localhost 
+
+- name: create a directory if it doesn't exist
+  file:
+    path: "{{ lookup('env','HOME') }}/.ssh/{{ application_name }}"
+    state: directory
+    mode: 0755
+  when: dir_stat.stat.exists == False 
+  delegate_to: localhost
+
+- name: Include generate_ssh.yml file
+  include: tasks/generate_ssh.yml username="{{ item }}"
+  with_items: "{{ users }}"
+
+- name: Include deploy.yml
+  include: tasks/deploy.yml username="{{ item }}"
+  with_items: "{{ users }}"
